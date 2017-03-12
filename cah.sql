@@ -5,6 +5,8 @@ CREATE TABLE users (
 	created TIMESTAMP DEFAULT NOW()
 );
 
+CREATE INDEX idx_users_username_password ON users (username, password);
+
 CREATE TABLE user_proxy (
 	id INT PRIMARY KEY AUTO_INCREMENT,
 	userid INT,
