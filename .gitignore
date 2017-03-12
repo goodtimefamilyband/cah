@@ -1,6 +1,6 @@
 .classpath
-.gradle
 .settings
 .vagrant
+.project
 bin
 build
