@@ -1,0 +1,67 @@
+package com.ajo.cah.game;
+
+import java.util.List;
+
+import com.ajo.cah.entities.BlackCard;
+import com.ajo.cah.entities.WhiteCard;
+import com.gamecon.GamePiece;
+import com.gamecon.GameState;
+import com.gamecon.turnbased.TurnGame;
+import com.gamecon.turnbased.TurnPlayer;
+
+public class CahPlayer extends TurnPlayer {
+
+  private List<BlackCard> blackCards;
+  private List<WhiteCard> whiteCards;
+  
+  public CahPlayer(String name, CahGame g, int turnOrder) {
+    super(name, g, turnOrder);
+  }
+  
+  
+
+  /*
+  @Override
+  public GameState<CahPlayer> doAction(GamePiece gp) {
+    
+    CahGame g = (CahGame)this.getGame();
+    GameState currentState = g.getCurrentState();
+    
+    if(currentState instanceof CahStateWhite) {
+      BlackCard bc = (BlackCard)gp;
+      
+      g.getCurrentWhiteCards().put(this, bc.getWhiteCards());
+      g.getWaitingPlayers().remove(this);
+      
+      if(g.getWaitingPlayers().isEmpty()) {
+        return g.getNextState("wait_for_current_player");
+      }
+      else {
+        return g.getCurrentState();
+      }
+    }
+    else if(currentState instanceof CahLockState) {
+      return g.getNextState("select_winner");
+    }
+    
+    return null;
+  }
+  */
+
+  public List<BlackCard> getBlackCards() {
+    return blackCards;
+  }
+
+  public void setBlackCards(List<BlackCard> blackCards) {
+    this.blackCards = blackCards;
+  }
+
+  public List<WhiteCard> getWhiteCards() {
+    return whiteCards;
+  }
+
+  public void setWhiteCards(List<WhiteCard> whiteCards) {
+    this.whiteCards = whiteCards;
+  }
+
+}
