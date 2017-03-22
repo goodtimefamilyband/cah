@@ -4,8 +4,11 @@ import java.util.List;
 
 import com.ajo.cah.entities.BlackCard;
 import com.ajo.cah.entities.WhiteCard;
+import com.gamecon.Exception.PlayerParticipationException;
+import com.gamecon.Game;
 import com.gamecon.GamePiece;
 import com.gamecon.GameState;
+import com.gamecon.Player;
 import com.gamecon.turnbased.TurnGame;
 import com.gamecon.turnbased.TurnPlayer;
 
@@ -18,6 +21,11 @@ public class CahPlayer extends TurnPlayer {
     super(name, g, turnOrder);
   }
   
+  
+  public CahPlayer(String name, CahGame g) throws PlayerParticipationException {
+    super(name, g);
+    g.addPlayer(this);
+  }
   
 
   /*
