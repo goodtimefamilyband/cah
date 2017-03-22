@@ -6,10 +6,11 @@ CREATE TABLE users (
 );
 
 CREATE INDEX idx_users_username_password ON users (username, password);
+CREATE INDEX idx_users_username ON users (username);
 
 CREATE TABLE user_proxy (
 	id INT PRIMARY KEY AUTO_INCREMENT,
-	userid INT,
+	userid INT DEFAULT NULL,
 	created TIMESTAMP DEFAULT NOW()
 );
 
@@ -70,3 +71,5 @@ CREATE TABLE card_instance (
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
+
+INSERT INTO roles (rolename) VALUES ('ROLE_USER');
