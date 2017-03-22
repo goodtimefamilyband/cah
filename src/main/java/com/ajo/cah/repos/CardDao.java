@@ -14,12 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.stereotype.Repository;
 
 import com.ajo.cah.entities.BlackCard;
 import com.ajo.cah.entities.Card;
 import com.ajo.cah.entities.WhiteCard;
 import com.ajo.cah.game.CahGame;
 import com.ajo.cah.game.CahPlayer;
+import com.gamecon.Game;
 
 /*
  * CREATE TABLE card (
@@ -45,18 +48,22 @@ CREATE TABLE card_instance (
 
  */
 
+@Repository
 public class CardDao extends AbstractIdDAO<Card> {
 
-  private static String ALL_CARDS_SQL = "SELECT * FROM card ORDER BY isblack;";
+  private static final String ALL_CARDS_SQL = "SELECT * FROM card ORDER BY isblack;";
   
-  private static String NEXT_CARD_SQL = 
+  private static final String NEXT_CARD_SQL = 
       "SELECT c.* FROM card"
       + " INNER JOIN card_instance ci ON c.id = ci.cardid"
       + " WHERE ci.gameid = ?"
       + " AND c.isblack = ?"
-      + " AND ci.owner IS NOT NULL"
+      + " AND ci.owner IS NULL"
       + " ORDER BY ci.deck_order"
       + " LIMIT 1";
+  
+  private static final String UPDATE_OWNER_SQL = 
+      "UPDATE card_instance SET owner = ? WHERE cardid = ? AND gameid = ?";
   
   protected boolean isBlack;
   
@@ -76,7 +83,7 @@ public class CardDao extends AbstractIdDAO<Card> {
   private SimpleJdbcInsert cardInstanceAdder;
   
   @Autowired
-  public void setDataSource(DataSource dataSource) {
+  public void setDataSource(DriverManagerDataSource dataSource) {
     super.setDataSource(dataSource);
     
     cardInstanceAdder = new SimpleJdbcInsert(dataSource)
@@ -126,7 +133,7 @@ public class CardDao extends AbstractIdDAO<Card> {
     
   }
   
-  public Card getNextFreeCard(int type, CahGame g) {
+  public Card getNextFreeCard(int type, Game g) {
     List<Card> cList = this.jdbcTemplate.query(
         NEXT_CARD_SQL, 
         new Object[]{g.getId(), type}, 
@@ -140,7 +147,17 @@ public class CardDao extends AbstractIdDAO<Card> {
   }
   
   public void setOwner(Card c, CahPlayer p) {
+    this.jdbcTemplate.update(UPDATE_OWNER_SQL, p.getId(), c.getId(), p.getGame().getId());
+  }
+  
+  public boolean draw(CahPlayer p, int type) {
+    Card c = getNextFreeCard(type, p.getGame());
+    if(c == null) {
+      return false;
+    }
     
+    setOwner(c, p);
+    return true;
   }
   
   public class CardRowMapper implements RowMapper<Card> {
