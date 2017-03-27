@@ -52,6 +52,12 @@ tasks.withType(FindBugs) {
     }
 }
 
+tasks.withType(JavaExec) {
+    if (System.getProperty('DEBUG', 'false') == 'true') {
+        jvmArgs '-Xdebug', '-Xrunjdwp:transport=debug_socket,server=y,suspend=y,address=9099'
+    }
+}
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
