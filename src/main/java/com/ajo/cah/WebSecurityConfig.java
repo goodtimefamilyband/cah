@@ -1,5 +1,7 @@
 package com.ajo.cah;
 
+import java.util.HashMap;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +21,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
+import com.ajo.cah.game.CahGame;
+
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   
   
   public static final String LOGIN_PATH = "/login";
+  private HashMap<Integer, CahGame> gameTbl = new HashMap<>();
   
   @Autowired
   DataSource dataSource;
@@ -44,8 +49,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
       http.authenticationProvider(authProvider())
           .authorizeRequests()
-              .antMatchers("/", "/home", "/signup", "/resources/**").permitAll()
-              .anyRequest().authenticated()
+              .antMatchers("/profile").authenticated()
+              .anyRequest().permitAll()
               .and()
           .formLogin()
               //.loginPage(LOGIN_PATH)
