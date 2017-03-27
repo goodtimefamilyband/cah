@@ -35,3 +35,5 @@ echo "GRANT ALL PRIVILEGES ON cah.* TO 'cah'@'%'" | mysql --user=$db_su --passwo
 
 cd /vagrant
 mysql --user=$db_usr --password=$db_pw cah < cah.sql
+sudo sed -i "s/^bind-address/# bind-address/g" /etc/mysql/my.cnf
+sudo service mysql restart
