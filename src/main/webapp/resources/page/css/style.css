@@ -62,11 +62,14 @@ div#msgTxt {
 }
 
 .card {
-	height: 40%;
 	border-radius: 10px;
 	font-size: 2.5em;
 	margin: 25px;
 	box-shadow: 20px 20px grey;
+}
+
+.app .card {
+	height: 40%;
 }
 
 .card-nav {
