@@ -9,10 +9,11 @@ import com.gamecon.Game;
 import com.gamecon.GamePiece;
 import com.gamecon.GameState;
 import com.gamecon.Player;
+import com.gamecon.schema.Modelable;
 import com.gamecon.turnbased.TurnGame;
 import com.gamecon.turnbased.TurnPlayer;
 
-public class CahPlayer extends TurnPlayer {
+public class CahPlayer extends TurnPlayer implements Modelable<CahPlayer.Model> {
 
   private List<BlackCard> blackCards;
   private List<WhiteCard> whiteCards;
@@ -70,6 +71,28 @@ public class CahPlayer extends TurnPlayer {
 
   public void setWhiteCards(List<WhiteCard> whiteCards) {
     this.whiteCards = whiteCards;
+  }
+  
+  public class Model {
+    
+    public int getGameId() {
+      return CahPlayer.this.getGame().getId();
+    }
+    
+    public List<WhiteCard> getWhiteCards() {
+      return CahPlayer.this.whiteCards;
+    }
+
+    public List<BlackCard> getBlackCards() {
+      return CahPlayer.this.blackCards;
+    }
+    
+  }
+
+  @Override
+  public Model getModel() {
+    // TODO Auto-generated method stub
+    return new Model();
   }
 
 }
