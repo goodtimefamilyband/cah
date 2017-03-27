@@ -1,13 +1,16 @@
 package com.ajo.cah;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.style.DefaultValueStyler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -19,7 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ajo.cah.entities.CahUser;
 import com.ajo.cah.entities.UserProxy;
+import com.ajo.cah.entities.WhiteCard;
 import com.ajo.cah.game.CahGame;
+import com.ajo.cah.game.CahPlayer;
+import com.ajo.cah.repos.CardDao;
 import com.ajo.cah.repos.GameDao;
 import com.ajo.cah.repos.PlayerDao;
 import com.ajo.cah.repos.UserDao;
@@ -29,10 +35,11 @@ import com.gamecon.Exception.PlayerParticipationException;
 @Controller
 public class BasicController {
 
-  private static final String USER_PROXY_NOEXIST = "-1";
+  static final int CARD_COUNT = 10;
+  static final String USER_PROXY_NOEXIST = "-1";
   //private static final String USER_PROXY_NOEXIST_STR = Integer.toString(USER_PROXY_NOEXIST);
   
-  private HashMap<Integer, CahGame> games = new HashMap<>();
+  private HashMap<Integer, CahGame> gameTbl = new HashMap<>();
   
   @Autowired
   private UserDao userDao;
@@ -46,12 +53,16 @@ public class BasicController {
   @Autowired
   private PlayerDao playerDao;
   
+  @Autowired
+  private CardDao cardDao;
+  
   public BasicController() {
     //game = new CahGame();
   }
   
   @GetMapping("/")
   public String addBoardForm(HttpServletRequest req, ModelMap model) {
+    model.addAttribute("games", gameTbl.values());
     return "home";
   }
   
@@ -70,16 +81,16 @@ public class BasicController {
       @CookieValue(name = "userproxy", defaultValue = USER_PROXY_NOEXIST) String upId,
       @RequestParam("gname") String name) throws IOException {
     CahGame g = gameDao.getNew(name);
-    games.put(g.getId(), g);
+    gameTbl.put(g.getId(), g);
     UserProxy up = getUserProxy(upId, resp);
     
-    try {
-      playerDao.addPlayer(up, g);
-      resp.sendRedirect("app/" + g.getId());
-    } catch (PlayerParticipationException e) {
+    //try {
+      //playerDao.addPlayer(up, g);
+      resp.sendRedirect("join/" + g.getId());
+    /*} catch (PlayerParticipationException e) {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-    }
+    }*/
   }
   
   @GetMapping("/join/{gameId}")
@@ -90,20 +101,33 @@ public class BasicController {
     
     UserProxy up = getUserProxy(upId, resp);
     
-    CahGame g = games.get(gameId);
+    CahGame g = gameTbl.get(gameId);
     if(g == null) {
       resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+      return;
     }
     
     try {
-      playerDao.addPlayer(up, g);
+      CahPlayer p = playerDao.addPlayer(up, g);
+      
+      System.out.println("addPlayer ID " + p.getId());
+      List<WhiteCard> cards = new ArrayList<WhiteCard>(CARD_COUNT);
+      for(int i = 0; i < CARD_COUNT; i++) {
+        WhiteCard card = (WhiteCard) cardDao.draw(p, CardDao.CARD_WHITE);
+        cards.add(card);
+      }
+      
+      p.setWhiteCards(cards);
+      
+      resp.sendRedirect("/app/" + g.getId() + "/");
+      
     } catch (PlayerParticipationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return;
     }
     
-    resp.sendRedirect("app/" + g.getId());
   }
   
   public UserProxy getUserProxy(String id, HttpServletResponse resp) {
@@ -162,5 +186,8 @@ public class BasicController {
     return "signup";
   }
     
-
+  @Bean(name="gameTbl")
+  public HashMap<Integer, CahGame> getGameTbl() {
+    return gameTbl;
+  }
 }
