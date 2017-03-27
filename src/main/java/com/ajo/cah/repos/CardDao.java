@@ -54,7 +54,7 @@ public class CardDao extends AbstractIdDAO<Card> {
   private static final String ALL_CARDS_SQL = "SELECT * FROM card ORDER BY isblack;";
   
   private static final String NEXT_CARD_SQL = 
-      "SELECT c.* FROM card"
+      "SELECT c.* FROM card c"
       + " INNER JOIN card_instance ci ON c.id = ci.cardid"
       + " WHERE ci.gameid = ?"
       + " AND c.isblack = ?"
@@ -71,8 +71,8 @@ public class CardDao extends AbstractIdDAO<Card> {
     super("card", "id");
   }
   
-  private static final int CARD_WHITE = 0;
-  private static final int CARD_BLACK = 1;
+  public static final int CARD_WHITE = 0;
+  public static final int CARD_BLACK = 1;
   
   private static final String ATTRIBS_FOR_NAME_SQL =
       "SELECT * FROM attribs WHERE name = ?";
@@ -134,6 +134,7 @@ public class CardDao extends AbstractIdDAO<Card> {
   }
   
   public Card getNextFreeCard(int type, Game g) {
+    System.out.println("getNextFreeCard(" + type + "," + g.getId() + ")");
     List<Card> cList = this.jdbcTemplate.query(
         NEXT_CARD_SQL, 
         new Object[]{g.getId(), type}, 
@@ -150,14 +151,15 @@ public class CardDao extends AbstractIdDAO<Card> {
     this.jdbcTemplate.update(UPDATE_OWNER_SQL, p.getId(), c.getId(), p.getGame().getId());
   }
   
-  public boolean draw(CahPlayer p, int type) {
+  public Card draw(CahPlayer p, int type) {
+    
     Card c = getNextFreeCard(type, p.getGame());
     if(c == null) {
-      return false;
+      return null;
     }
     
     setOwner(c, p);
-    return true;
+    return c;
   }
   
   public class CardRowMapper implements RowMapper<Card> {
@@ -167,10 +169,10 @@ public class CardDao extends AbstractIdDAO<Card> {
       
       Card c;
       if(rs.getBoolean("isblack")) {
-        c = new WhiteCard();
+        c = new BlackCard();
       }
       else {
-        c = new BlackCard();
+        c = new WhiteCard();
       }
       
       c.setId(rs.getInt("id"));
@@ -221,7 +223,7 @@ public class CardDao extends AbstractIdDAO<Card> {
       
       int idx = r.nextInt(max);
       Card c = carr[idx];
-      arraySwap(carr, idx, max);
+      arraySwap(carr, idx, max - 1);
       
       ps.setInt(1, c.getId());
       ps.setInt(2, constParam);

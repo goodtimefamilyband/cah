@@ -15,6 +15,9 @@ public class GameDao extends AbstractIdDAO<CahGame> {
 
   private SimpleJdbcInsert gameAdder;
   
+  @Autowired
+  private CardDao cardDao;
+  
   protected GameDao() {
     super("game", "id");
     // TODO Auto-generated constructor stub
@@ -37,6 +40,8 @@ public class GameDao extends AbstractIdDAO<CahGame> {
     
     CahGame g = new CahGame();
     g.setId(id.intValue());
+    g.setName(name);
+    cardDao.initGame(g);
     
     return g;
   }
